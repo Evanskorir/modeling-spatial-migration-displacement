@@ -19,13 +19,12 @@ class DataLoader:
         "Born_outside_Kenya":                   "born_outside_kenya",
 
         # migration reasons
-        "Employment":                           "reason_employment",
-        "Education_/_Training":                 "reason_education_training",
-        "Education/Training":                   "reason_education_training",
-        "Marriage_Formation":                   "reason_marriage_formation",
-        "Family_Reunification/Other_Family-related": "reason_family_reunification",
-        "Forced_Displacement":                  "reason_forced_displacement",
-        "Other":                                "reason_other",
+        "Employment_Migration":                   "reason_employment",
+        "Education_Migration":                   "reason_education_training",
+        "Marriage_Migration":                     "reason_marriage_formation",
+        "Family_Migration":                        "reason_family_reunification",
+        "Forced_Migration":                         "reason_forced_displacement",
+        "Other_reason_Migration":                   "reason_other",
 
         # education attainment
         "No_education":                         "edu_none",
@@ -41,21 +40,21 @@ class DataLoader:
         "Not_employed_last_12_months":          "employed_none_last12m",
 
         # food security
-        "Poor_pct":                             "food_poor_pct",
-        "Borderline_pct":                       "food_borderline_pct",
-        "Acceptable_pct":                       "food_acceptable_pct",
+        "Poor_Food_Consumption_Score":                   "food_poor_pct",
+        "Borderline_Food_Consumption_Score":             "food_borderline_pct",
+        "Acceptable_Food_Consumption_Score":            "food_acceptable_pct",
         "Mean_Coping_Strategy_Index":           "food_mean_coping_strategy_index",
 
         # inequality
         "Gini_coefficient":                     "gini_coefficient",
 
         # access / services
-        "Distance_to_health_facility_pct":      "distance_to_health_facility_pct",
-        "Water_Availability_%":                 "water_available_pct",
-        "Accesses_none_percent":                "media_access_none_pct",
-        "Mass_media_access_percent":            "media_access_any_pct",
-        "Almost_every_day":                     "internet_almost_every_day_pct",
-        "At_least_once_a_week":                 "internet_at_least_weekly_pct",
+        "Distance_to_health_facility":      "distance_to_health_facility_pct",
+        "Water_Availability":                   "water_available_pct",
+        "No_Mass_Media_Access":                "media_access_none_pct",
+        "Mass_Media_Access":                 "media_access_any_pct",
+        "Daily_Internet_Access":            "internet_almost_every_day_pct",
+        "Weekly_Internet_access":              "internet_at_least_weekly_pct",
 
         # geography & economy
         "Population":                           "population",
@@ -63,7 +62,7 @@ class DataLoader:
         "Population_Density":                   "population_density",
         "Working_Population":                   "working_population",
         "Poverty_Rate":                         "poverty_rate_pct",
-        "GDP":                                  "gdp",
+        "Gross_Domestic_Product":                "gdp",
         "Average_Household_Size":               "avg_household_size",
     }
 
