@@ -115,7 +115,7 @@ class Runner:
                 )
                 leamer_df, sim_df = eba.analyze()
 
-                # Print concise EBA summaries to console
+                # Print EBA summaries to console
                 print(f"\nEBA — Leamer (stringent) summary [{gender}]")
                 if not leamer_df.empty:
                     for _, r in leamer_df.iterrows():
@@ -190,9 +190,21 @@ class Runner:
             self.distance_calc.get_all_distances(),
             self.data_any.get_all_counties(),
         )
+
+        # Female correlation matrix
         self.plotter.plot_variable_correlation_matrix(
-            data=self.data_any,
-            output_path=f"{self.output_dir}/correlation_matrix.pdf",
+            data=self.data_fem,
+            output_path=f"{self.output_dir}/correlation_matrix_female.pdf",
+        )
+        # Male correlation matrix
+        self.plotter.plot_variable_correlation_matrix(
+            data=self.data_male,
+            output_path=f"{self.output_dir}/correlation_matrix_male.pdf",
+        )
+        self.plotter.plot_gender_correlation_difference(
+            data_male=self.data_male,
+            data_female=self.data_fem,
+            output_path=f"{self.output_dir}/correlation_matrix_gender_difference.pdf",
         )
 
         # Stacked percent bars for both genders

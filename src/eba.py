@@ -124,7 +124,6 @@ class ExtremeBoundsAnalyzer:
         return specs
 
     # ---------- Leamer EBA ----------
-
     @staticmethod
     def _extreme_bounds(specs: List[EBASpec], t_crit: float = 1.96) -> Dict[str, float]:
         """
@@ -142,7 +141,6 @@ class ExtremeBoundsAnalyzer:
         return bounds["lower"] > 0 or bounds["upper"] < 0
 
     # ---------- Sala-i-Martin EBA ----------
-
     @staticmethod
     def _cdf_zero_for_spec(coef: float, se: float) -> float:
         """Prob(coef > 0) under Normal approx; return mass on sign of mean."""
@@ -191,7 +189,6 @@ class ExtremeBoundsAnalyzer:
         }
 
     # ---------- Public API ----------
-
     def analyze(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         Returns:

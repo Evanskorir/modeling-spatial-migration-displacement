@@ -182,6 +182,68 @@ class Plotter:
         print(f"Distance matrix heatmap saved to {save_path}")
 
     @staticmethod
+    def plot_gender_correlation_difference(
+            data_male,
+            data_female,
+            output_path="output/correlation_matrix_gender_difference.pdf",
+    ):
+        """
+        Plot Male − Female correlation matrix difference,
+        visually aligned with plot_variable_correlation_matrix,
+        using a colorbar instead of annotations.
+        """
+
+        # --- Load raw data ---
+        df_m = data_male.get_all_data()
+        df_f = data_female.get_all_data()
+
+        # --- SAME correlation logic as individual plots ---
+        corr_m = df_m.corr().round(2)
+        corr_f = df_f.corr().round(2)
+
+        # --- Enforce identical ordering ---
+        corr_f = corr_f.loc[corr_m.index, corr_m.columns]
+
+        # --- Difference ---
+        corr_diff = (corr_m - corr_f).round(2)
+        corr_diff = corr_diff.iloc[::-1]
+
+        labels = [col.replace("_", " ") for col in corr_diff.columns]
+
+        # --- Plot ---
+        fig, ax = plt.subplots(figsize=(16, 14))
+
+        norm = Normalize(vmin=-1, vmax=1)
+        im = ax.imshow(corr_diff.values, cmap="coolwarm", norm=norm)
+
+        ticks = np.arange(len(corr_diff.columns))
+        ax.set_xticks(ticks)
+        ax.set_yticks(ticks)
+        ax.set_xticklabels(labels, rotation=90, ha="center", fontsize=14)
+        ax.set_yticklabels(labels[::-1], fontsize=14)
+
+        ax.tick_params(bottom=True, top=False, labelbottom=True, labeltop=False)
+
+        for spine in ax.spines.values():
+            spine.set_visible(True)
+            spine.set_linewidth(3)
+
+        # --- Colorbar (same pattern as distance heatmap) ---
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="4%", pad=0.4)
+
+        cb = plt.colorbar(im, cax=cax)
+        cb.set_label("Correlation Difference (Male − Female)", fontsize=16)
+        cb.ax.tick_params(labelsize=14)
+
+        plt.tight_layout()
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        plt.savefig(output_path, dpi=300)
+        plt.close()
+
+        print(f"gender correlation difference saved to {output_path}")
+
+    @staticmethod
     def plot_variable_correlation_matrix(data,
                                          output_path="output/correlation_matrix.pdf"):
         df = data.get_all_data()

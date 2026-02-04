@@ -14,9 +14,9 @@ class DataLoader:
     # Map original column headers
     COLUMN_ALIAS: Dict[str, str] = {
         # migration origin
-        "Born_in_current_place":                "born_in_current_place",
+        # "Born_in_current_place":                "born_in_current_place",
         "Born_in_Kenya_but_outside":            "born_in_kenya_outside_current_place",
-        "Born_outside_Kenya":                   "born_outside_kenya",
+        # "Born_outside_Kenya":                   "born_outside_kenya",
 
         # migration reasons
         "Employment_Migration":                   "reason_employment",

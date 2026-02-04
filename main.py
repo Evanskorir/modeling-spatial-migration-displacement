@@ -2,7 +2,7 @@ from src.runner import Runner
 
 
 def main():
-    run = Runner(hub="Busia")
+    run = Runner(hub="Mandera")
     run.run()
 
 
