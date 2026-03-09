@@ -109,7 +109,9 @@ class DataLoader:
         df.set_index(county_col, inplace=True)
 
         # keep numerics where possible
-        df = df.apply(pd.to_numeric, errors="ignore")
+        # df = df.apply(pd.to_numeric, errors="ignore")
+        df = df.apply(pd.to_numeric, errors="coerce")
+
         self.data_df = df
 
         # Build a dict of variables with clean names -> dict(county -> value)

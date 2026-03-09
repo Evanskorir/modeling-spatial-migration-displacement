@@ -8,11 +8,12 @@ from src.distance_calculator import DistanceCalculator
 from src.eba import ExtremeBoundsAnalyzer
 from src.gravity.gravity_calculator import GravityModel
 from src.gravity.gravity_migration_model import MigrationGravityModel
+from src.gravity.gravity_autoregression import SpatialGravityModel
 from src.plotter import Plotter
 
 
 class Runner:
-    def __init__(self, hub: str = "Nairobi", alpha: float = 0.05,
+    def __init__(self, hub: str = "Mandera", alpha: float = 0.05,
                  output_dir: str = "output"):
         self.hub = hub
         self.alpha = alpha
@@ -31,6 +32,40 @@ class Runner:
         self.gdf = self.data_any.load_county_shapefile()
         self.plotter = Plotter(gravity_dict={})
         os.makedirs(self.output_dir, exist_ok=True)
+
+        # SAR variables (from OLS significance tables)
+        self.sar_variables = {
+            "female": [
+                "log_population",
+                "log_gdp",
+                "log_population_density",
+                "log_land_area_km2",
+                "log_distance",
+                "avg_household_size",
+                "reason_employment",
+                "reason_forced_displacement",
+                "employed_not_currently",
+                "food_acceptable_pct",
+            ],
+            "male": [
+                "log_working_population",
+                "log_gdp",
+                "log_distance",
+                "gini_coefficient",
+                "media_access_any_pct",
+                "media_access_none_pct",
+                "reason_employment",
+                "reason_marriage_formation",
+                "reason_family_reunification",
+                "reason_forced_displacement",
+                "edu_none",
+                "edu_some_primary",
+                "edu_some_secondary",
+                "edu_completed_secondary",
+                "employed_none_last12m",
+                "food_borderline_pct",
+            ],
+        }
 
     def run(self) -> None:
         print("\n=== Dataset loaded ===")
@@ -113,26 +148,23 @@ class Runner:
                     random_subsample=None,  # or e.g. 500 if too many combinations
                     alpha=self.alpha,
                 )
-                leamer_df, sim_df = eba.analyze()
+                eba.analyze()
 
-                # Print EBA summaries to console
-                print(f"\nEBA — Leamer (stringent) summary [{gender}]")
-                if not leamer_df.empty:
-                    for _, r in leamer_df.iterrows():
-                        print(f"  {r['variable']:>28s} : "
-                              f"lower={r['lower_95']:+.4f}  upper={r['upper_95']:+.4f}  "
-                              f"robust={bool(r['leamer_robust'])}  (n={int(r['n_specs'])})")
-                else:
-                    print("  No EBA rows.")
+                # ---------------- SPATIAL AUTOREGRESSION (SAR) ----------------
+                print(f"\nRunning SAR for migration [{gender}]")
+                sar = SpatialGravityModel(
+                    data_loader=dl,
+                    distance_matrix=self.distance_calc.get_all_distances(),
+                    distances_from_county_hub=self.dist_from_hub,
+                    target_variable="Born_in_Kenya_but_outside",
+                    output_dir=os.path.join(self.output_dir, "sar", gender),
+                )
 
-                print(f"\nEBA — Sala-i-Martin summary [{gender}] (weighted by {eba.weight_by})")
-                if not sim_df.empty:
-                    for _, r in sim_df.iterrows():
-                        print(f"  {r['variable']:>28s} : "
-                              f"beta_bar={r['beta_bar']:+.4f}  se={r['se_beta']:.4f}  "
-                              f"CDF(0)={r['CDF0']:.3f}  (n={int(r['n_specs'])})")
-                else:
-                    print("  No EBA rows.")
+                sar.fit_model_for_single_point(
+                    label=f"{gender}_{self.hub}",
+                    selected_vars=self.sar_variables[gender],
+                    target_dict=shares.to_dict(),
+                )
 
             # Print clusters for BOTH modes
             for mode in ("percent", "count"):
