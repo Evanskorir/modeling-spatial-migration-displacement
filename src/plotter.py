@@ -597,12 +597,8 @@ class Plotter:
         plt.savefig(out_pdf)
         plt.close()
 
-    def plot_stacked_percent_bars_by_county(
-            self,
-            data_loader,
-            gender: str = "female",
-            filename: str = "county_stacked_selected_vars.pdf",
-    ):
+    def plot_stacked_percent_bars_by_county(self, data_loader, gender: str = "female",
+                                            filename: str = "stacked_vars.pdf"):
         """
         Single-method, themed & tidy stacked plot (gender-aware).
         """
@@ -780,6 +776,16 @@ class Plotter:
 
         ax.set_xticks(df["x_plot"])
         ax.set_xticklabels(df["County"], rotation=90, fontsize=9)
+
+        # highlight hub county on x-axis
+        hub_name = "Mandera"
+
+        for label in ax.get_xticklabels():
+            if label.get_text() == hub_name:
+                label.set_color("darkred")
+                label.set_fontweight("bold")
+                label.set_fontsize(11)
+
         ax.set_ylabel("Percentage (%)", fontsize=15, fontweight="bold")
         ax.tick_params(axis="y", labelsize=12, length=4.5, width=1.1)
         ax.set_ylim(0, max(100, bottoms.max() * 1.12))
@@ -826,7 +832,8 @@ class Plotter:
 
     def _draw_top_number_name_legend(self, ax, county_number_map, color_lookup):
         ax.axis("off")
-        sorted_pairs = sorted(county_number_map.items(), key=lambda x: x[1])  # by number
+        sorted_pairs = sorted(county_number_map.items(),
+                              key=lambda x: x[1])  # by number
         n_cols, x_spacing, y_spacing, font_size = 6, 0.18, 0.16, 20
         for idx, (county, num) in enumerate(sorted_pairs):
             row, col = divmod(idx, n_cols)
@@ -863,8 +870,10 @@ class Plotter:
             if max(line.get_ydata()) > 0:
                 line.set_color("darkblue")
                 line.set_linewidth(1.0)
-        ax.set_ylabel("Cluster distance", fontsize=18, fontweight="bold", color="darkblue")
-        ax.tick_params(axis="y", labelsize=12, width=1.2, length=8, colors="darkblue")
+        ax.set_ylabel("Cluster distance", fontsize=18, fontweight="bold",
+                      color="darkblue")
+        ax.tick_params(axis="y", labelsize=12, width=1.2, length=8,
+                       colors="darkblue")
         ax.tick_params(axis="x", bottom=False)
         # color tick labels to match leaf colors
         for lbl in ax.get_xmajorticklabels():
@@ -989,7 +998,8 @@ class Plotter:
         gender = (gender or "female").strip().lower()
         if save_path is None:
             suffix = "percent" if mode == "percent" else "count"
-            save_path = os.path.join(self.output_dir, f"combined_born_outside_{gender}_{suffix}.pdf")
+            save_path = os.path.join(self.output_dir,
+                                     f"combined_born_outside_{gender}_{suffix}.pdf")
 
         # --- Pick series based on mode ---
         share_series = data_loader.data_df["Born_in_Kenya_but_outside"]
@@ -1048,116 +1058,6 @@ class Plotter:
         plt.savefig(save_path, dpi=400, facecolor="white", transparent=False)
         plt.close(fig)
         print(f"Combined cluster view saved to: {save_path}")
-
-    def _render_born_outside_vs_distance_from_artifacts2(
-            self, ax, y_series, distance_from_mandera,
-            counties, county_number_map):
-        def N(x):
-            return self._normalize_county(x)
-
-        s = y_series.copy()
-        s = s.astype(str).str.replace(",", ".", regex=False)
-        s = pd.to_numeric(s, errors="coerce")
-        s.index = [N(i) for i in s.index]
-
-        d = {N(k): float(v) for k, v in distance_from_mandera.items()}
-        d[N("Mandera")] = 0.0
-
-        all_counties = sorted(set(counties) | set(s.index) | set(d.keys()))
-        for c in all_counties:
-            num = county_number_map.get(c)
-            if num is None:
-                continue
-            label = str(num)
-            color = self.dendo_colors.get(label, "gray")
-            x, y = d.get(c), s.get(c)
-            if pd.notna(x) and pd.notna(y):
-                ax.scatter(x, y, color=color, edgecolor="black",
-                           linewidth=0.35, s=55, zorder=3)
-                ax.text(
-                    x + 8, y, label, fontsize=12, ha="left", va="center",
-                    weight="bold", color=color, zorder=5,
-                    path_effects=[
-                        patheffects.Stroke(linewidth=2.0, foreground="white"),
-                        patheffects.Normal(),
-                    ],
-                )
-        ax.set_xlabel("Distance from Mandera (km)", fontsize=16, fontweight="bold")
-        ax.set_ylabel("Born in Kenya but outside current county (%)",
-                      fontsize=16, fontweight="bold")
-        for side in ("top", "right"): ax.spines[side].set_visible(False)
-        for side in ("left", "bottom"):
-            ax.spines[side].set_linewidth(2.0)
-            ax.spines[side].set_color("black")
-            ax.spines[side].set_position(("outward", 8))
-        ax.minorticks_off()
-        ax.tick_params(axis="both", which="major",
-                       direction="out", length=7, width=1.6, colors="black",
-                       bottom=True, top=False, left=True, right=False, labelsize=12)
-
-    def plot_combined_born_outside_view_for_gender2(
-            self, shapefile_gdf, data_loader, distance_from_mandera: dict[str, float],
-            gender: str = "female", cluster_threshold: float = 1.5,
-            save_path: str | None = None, shapefile_name_col: str = "NAME",
-    ):
-        """
-        DRY combined figure:
-          - top legend (number → name)
-          - dendrogram (uses CountyClustering once)
-          - cluster map (reuses dendrogram colors)
-          - scatter vs distance from Mandera (reuses colors)
-        """
-
-        gender = (gender or "female").strip().lower()
-        if save_path is None:
-            save_path = os.path.join(self.output_dir, f"combined_born_outside_{gender}.pdf")
-
-        # --- 1) CLUSTER ONCE via CountyClustering (no scaling here in Plotter) ---
-        series = data_loader.data_df["Born_in_Kenya_but_outside"]
-        cc = CountyClustering(immigrants=series, output_dir=self.output_dir,
-                              gender=gender)
-        _, labels, Z = cc.cluster_on_immigration_data(
-            cluster_threshold=cluster_threshold, show_clusters=False)
-        counties = [self._normalize_county(c) for c in labels.index.tolist()]
-        county_number_map = self._make_county_number_map(counties)
-
-        # --- 2) LAYOUT ---
-        fig = plt.figure(figsize=(25, 22), dpi=300)
-        gs = gridspec.GridSpec(3, 6, height_ratios=[0.8, 2.5, 2.2],
-                               width_ratios=[1.3, 1, 1, 1, 1, 1])
-        gs.update(hspace=0.4, wspace=0.2)
-        ax_abbrev = fig.add_subplot(gs[0, :])
-        ax_dendro = fig.add_subplot(gs[1, 0:4])
-        ax_map = fig.add_subplot(gs[1:3, 4:6])
-        ax_scatter = fig.add_subplot(gs[2, 0:4])
-
-        # enlarge map pane a touch
-        box = ax_map.get_position()
-        ax_map.set_position([box.x0 - 0.02, box.y0 - 0.09, box.width * 1.5,
-                             box.height * 1.3])
-
-        # --- 3) RENDERERS (no recomputation) ---
-        self._render_dendrogram(ax_dendro, Z, county_number_map,
-                                cluster_threshold)
-        self._render_cluster_map_from_artifacts(
-            ax=ax_map, shapefile_gdf=shapefile_gdf, counties=counties,
-            county_number_map=county_number_map, Z=Z,
-            cluster_threshold=cluster_threshold, name_col=shapefile_name_col
-        )
-        self._render_born_outside_vs_distance_from_artifacts(
-            ax=ax_scatter, y_series=series, distance_from_mandera=distance_from_mandera,
-            counties=counties, county_number_map=county_number_map
-        )
-        self._draw_top_number_name_legend(ax_abbrev, county_number_map,
-                                          self.dendo_colors)
-
-        # --- 4) SAVE ---
-        fig.tight_layout(rect=[0, 0, 1, 0.95])
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        plt.savefig(save_path, dpi=400, facecolor="white", transparent=False)
-        plt.close(fig)
-        print(f"Combined cluster view saved to: {save_path}")
-
 
 
 

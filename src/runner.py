@@ -195,49 +195,49 @@ class Runner:
                 mode="percent",
             )
             # count page
-            self.plotter.plot_combined_born_outside_view_for_gender(
-                shapefile_gdf=self.gdf,
-                data_loader=dl,
-                distance_from_mandera=self.dist_from_hub,
-                gender=gender,
-                cluster_threshold=1.5 if gender == "female" else 1.5,
-                save_path=os.path.join(self.output_dir,
-                                       f"combined_born_outside_{gender}_count.pdf"),
-                shapefile_name_col="NAME",
-                mode="count",
-            )
-
-        # single overlay (per-gender bubbles, distance bands)
-        self.plotter.plot_migration_vector_map_gender_overlay(
-            distances_from_hub=self.dist_from_hub,
-            share_series_male=self.data_male.data_df["Born_in_Kenya_but_outside"],
-            share_series_female=self.data_fem.data_df["Born_in_Kenya_but_outside"],
-            population_series=self.data_any.data_df["Population"],
-            coordinates_dict=self.coordinates, shapefile_gdf=self.gdf,
-            output_path=self.output_dir, hub_name=self.hub,
-            filename=f"migration_overlay_{self.hub.lower()}.png", )
-
-        # Distance heatmap + correlation matrix
-        self.plotter.plot_distance_heatmap(
-            self.distance_calc.get_all_distances(),
-            self.data_any.get_all_counties(),
-        )
-
-        # Female correlation matrix
-        self.plotter.plot_variable_correlation_matrix(
-            data=self.data_fem,
-            output_path=f"{self.output_dir}/correlation_matrix_female.pdf",
-        )
-        # Male correlation matrix
-        self.plotter.plot_variable_correlation_matrix(
-            data=self.data_male,
-            output_path=f"{self.output_dir}/correlation_matrix_male.pdf",
-        )
-        self.plotter.plot_gender_correlation_difference(
-            data_male=self.data_male,
-            data_female=self.data_fem,
-            output_path=f"{self.output_dir}/correlation_matrix_gender_difference.pdf",
-        )
+        #     self.plotter.plot_combined_born_outside_view_for_gender(
+        #         shapefile_gdf=self.gdf,
+        #         data_loader=dl,
+        #         distance_from_mandera=self.dist_from_hub,
+        #         gender=gender,
+        #         cluster_threshold=1.5 if gender == "female" else 1.5,
+        #         save_path=os.path.join(self.output_dir,
+        #                                f"combined_born_outside_{gender}_count.pdf"),
+        #         shapefile_name_col="NAME",
+        #         mode="count",
+        #     )
+        #
+        # # single overlay (per-gender bubbles, distance bands)
+        # self.plotter.plot_migration_vector_map_gender_overlay(
+        #     distances_from_hub=self.dist_from_hub,
+        #     share_series_male=self.data_male.data_df["Born_in_Kenya_but_outside"],
+        #     share_series_female=self.data_fem.data_df["Born_in_Kenya_but_outside"],
+        #     population_series=self.data_any.data_df["Population"],
+        #     coordinates_dict=self.coordinates, shapefile_gdf=self.gdf,
+        #     output_path=self.output_dir, hub_name=self.hub,
+        #     filename=f"migration_overlay_{self.hub.lower()}.png", )
+        #
+        # # Distance heatmap + correlation matrix
+        # self.plotter.plot_distance_heatmap(
+        #     self.distance_calc.get_all_distances(),
+        #     self.data_any.get_all_counties(),
+        # )
+        #
+        # # Female correlation matrix
+        # self.plotter.plot_variable_correlation_matrix(
+        #     data=self.data_fem,
+        #     output_path=f"{self.output_dir}/correlation_matrix_female.pdf",
+        # )
+        # # Male correlation matrix
+        # self.plotter.plot_variable_correlation_matrix(
+        #     data=self.data_male,
+        #     output_path=f"{self.output_dir}/correlation_matrix_male.pdf",
+        # )
+        # self.plotter.plot_gender_correlation_difference(
+        #     data_male=self.data_male,
+        #     data_female=self.data_fem,
+        #     output_path=f"{self.output_dir}/correlation_matrix_gender_difference.pdf",
+        # )
 
         # Stacked percent bars for both genders
         self.plotter.plot_stacked_percent_bars_by_county(
